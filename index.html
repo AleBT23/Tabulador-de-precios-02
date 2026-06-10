@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="ArchiQuote Pro — Tabulador de precios y generador de propuestas para despachos de arquitectura y consultoría BIM." />
+  <meta name="theme-color" content="#0D0D0D" />
+  <title>ArchiQuote Pro — Tabulador & Propuestas</title>
+
+  <!-- Preconnect for Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- jsPDF CDN (auto-table bundled via UMD) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       SIDEBAR NAVIGATION
+  ═══════════════════════════════════════ -->
+  <aside id="sidebar" role="navigation" aria-label="Navegación principal">
+    <div class="sidebar-logo" aria-label="ArchiQuote Pro">
+      <div class="logo-mark">ArchiQuote</div>
+      <div class="logo-sub">Pro Edition</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-section="dashboard" id="nav-dashboard" role="button" tabindex="0" aria-current="page">
+        <span class="nav-icon" aria-hidden="true">◈</span>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item" data-section="tabulator" id="nav-tabulator" role="button" tabindex="0">
+        <span class="nav-icon" aria-hidden="true">⊞</span>
+        <span>Tabulador de Precios</span>
+      </div>
+      <div class="nav-item" data-section="proposal" id="nav-proposal" role="button" tabindex="0">
+        <span class="nav-icon" aria-hidden="true">✦</span>
+        <span>Nueva Propuesta</span>
+      </div>
+      <div class="nav-item" data-section="history" id="nav-history" role="button" tabindex="0">
+        <span class="nav-icon" aria-hidden="true">◎</span>
+        <span>Historial</span>
+      </div>
+      <div class="nav-item" data-section="settings" id="nav-settings" role="button" tabindex="0">
+        <span class="nav-icon" aria-hidden="true">⚙</span>
+        <span>Configuración</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>ArchiQuote Pro v1.0</span>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════
+       MAIN WRAPPER
+  ═══════════════════════════════════════ -->
+  <div id="app-wrapper">
+
+    <!-- TOP BAR -->
+    <header id="topbar" role="banner">
+      <button id="btn-hamburger" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <div class="topbar-right">
+        <span class="topbar-date" id="topbar-date"></span>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT (dynamically rendered by app.js) -->
+    <main id="main-content" role="main" aria-live="polite">
+      <!-- Content injected by JavaScript -->
+    </main>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TOAST NOTIFICATION CONTAINER
+  ═══════════════════════════════════════ -->
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- ═══════════════════════════════════════
+       SCRIPTS (order matters)
+  ═══════════════════════════════════════ -->
+  <script src="config.js"></script>
+  <script src="storage.js"></script>
+  <script src="pdf.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Inline boot script: topbar date + keyboard nav -->
+  <script>
+    // Display today's date in topbar
+    (function () {
+      const el = document.getElementById('topbar-date');
+      if (el) {
+        el.textContent = new Date().toLocaleDateString('es-MX', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+      }
+
+      // Update topbar title on navigation
+      const observer = new MutationObserver(() => {
+        const active = document.querySelector('.nav-item.active span:not(.nav-icon)');
+        if (active) document.getElementById('topbar-title').textContent = active.textContent;
+      });
+      observer.observe(document.getElementById('sidebar'), { subtree: true, attributes: true });
+
+      // Keyboard accessibility for nav items
+      document.addEventListener('keydown', (e) => {
+        if (e.target.classList.contains('nav-item') && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          e.target.click();
+        }
+      });
+
+      // Update hamburger aria-expanded
+      const burger  = document.getElementById('btn-hamburger');
+      const sidebar = document.getElementById('sidebar');
+      if (burger && sidebar) {
+        const syncAria = () => burger.setAttribute('aria-expanded', sidebar.classList.contains('open'));
+        new MutationObserver(syncAria).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+      }
+    })();
+  </script>
+
+</body>
+</html>
